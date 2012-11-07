@@ -23,7 +23,7 @@ module Rack
     def call(env)
       if @exclude && @exclude.call(env)
         @app.call(env)
-      elsif scheme(env) == 'https'
+      elsif scheme(env) == 'https' && correct_host(env)
         status, headers, body = @app.call(env)
         headers = hsts_headers.merge(headers)
         flag_cookies_as_secure!(headers)
@@ -43,6 +43,14 @@ module Rack
         else
           env['rack.url_scheme']
         end
+      end
+
+      def correct_host(env)
+        return true unless @host
+
+        req = Request.new(env)
+        url = URI(req.url)
+        url.host == @host
       end
 
       def redirect_to_https(env)

@@ -137,4 +137,11 @@ class TestSSL < Test::Unit::TestCase
     assert_equal "https://example.co.uk/path?key=value",
       last_response.headers['Location']
   end
+
+  def test_redirect_to_host_on_ssl
+    self.app = Rack::SSL.new(default_app, :host => "ssl.example.org")
+    get "https://example.org/path?key=value"
+    assert_equal "https://ssl.example.org/path?key=value",
+      last_response.headers['Location']
+  end
 end
